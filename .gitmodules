@@ -1,0 +1,3 @@
+[submodule "libs/java-crdt"]
+	path = libs/java-crdt
+	url = git@github.com:ajantis/java-crdt.git
