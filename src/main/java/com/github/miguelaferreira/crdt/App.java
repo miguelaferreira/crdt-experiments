@@ -4,6 +4,7 @@
 package com.github.miguelaferreira.crdt;
 
 import io.dmitryivanov.crdt.LWWSet;
+import io.micronaut.runtime.Micronaut;
 
 public class App {
 
@@ -50,6 +51,9 @@ public class App {
     }
 
     public static void main(String[] args) {
-        System.out.println(new App().doOfflineWork());
+
+//        System.out.println(new App().doOfflineWork());
+
+        Micronaut.run(App.class);
     }
 }

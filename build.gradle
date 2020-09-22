@@ -7,6 +7,9 @@
  */
 
 plugins {
+    id "com.diffplug.eclipse.apt" version "3.22.0"
+    id "com.github.johnrengelman.shadow" version "5.2.0"
+
     // Apply the java plugin to add support for Java
     id 'java'
 
@@ -14,22 +17,52 @@ plugins {
     id 'application'
 }
 
+version "0.1"
+group "com.github.migualaferreira"
+
 repositories {
+    mavenCentral()
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
 }
 
+configurations {
+    // for dependencies that are needed for development only
+    developmentOnly
+}
+
 dependencies {
+    annotationProcessor(platform("io.micronaut:micronaut-bom:$micronautVersion"))
+    annotationProcessor("io.micronaut:micronaut-inject-java")
+    annotationProcessor("io.micronaut:micronaut-validation")
+
     // This dependency is used by the application.
     implementation files('libs/java-crdt/target/java-crdt-1.0-SNAPSHOT.jar')
+
+    implementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
+    implementation("io.micronaut:micronaut-inject")
+    implementation("io.micronaut:micronaut-validation")
+    implementation("io.micronaut:micronaut-runtime")
+    implementation("io.micronaut:micronaut-http-server-netty")
+    runtimeOnly("ch.qos.logback:logback-classic")
+
+    testAnnotationProcessor(platform("io.micronaut:micronaut-bom:$micronautVersion"))
+    testAnnotationProcessor("io.micronaut:micronaut-inject-java")
+
+    testImplementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
 
     // Use JUnit Jupiter API for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
 
+    testImplementation("io.micronaut.test:micronaut-test-junit5")
+
     // Use JUnit Jupiter Engine for testing.
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
 }
+
+test.classpath += configurations.developmentOnly
+
 
 application {
     // Define the main class for the application.
@@ -39,6 +72,39 @@ application {
 test {
     // Use junit platform for unit tests
     useJUnitPlatform()
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion('14')
+    targetCompatibility = JavaVersion.toVersion('14')
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+    options.compilerArgs.addAll([
+            '-parameters',
+            // enables incremental compilation
+            '-Amicronaut.processing.incremental=true',
+            '-Amicronaut.processing.annotations=com.github.miguelaferreira.*',
+            "-Amicronaut.processing.group=$project.group",
+            "-Amicronaut.processing.module=$project.name",
+    ])
+}
+
+shadowJar {
+    mergeServiceFiles()
+}
+
+tasks.withType(JavaExec) {
+    classpath += configurations.developmentOnly
+    jvmArgs('-XX:TieredStopAtLevel=1', '-Dcom.sun.management.jmxremote')
+    if (gradle.startParameter.continuous) {
+        systemProperties(
+                'micronaut.io.watch.restart':'true',
+                'micronaut.io.watch.enabled':'true',
+                "micronaut.io.watch.paths":"src/main"
+        )
+    }
 }
 
 targetCompatibility = 14
