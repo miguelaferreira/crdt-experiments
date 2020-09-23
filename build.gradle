@@ -40,6 +40,8 @@ dependencies {
     // This dependency is used by the application.
     implementation files('libs/java-crdt/target/java-crdt-1.0-SNAPSHOT.jar')
 
+    implementation group: 'io.vavr', name: 'vavr', version: '0.10.3'
+
     implementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     implementation("io.micronaut:micronaut-inject")
     implementation("io.micronaut:micronaut-validation")

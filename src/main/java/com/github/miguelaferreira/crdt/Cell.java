@@ -54,17 +54,13 @@ public class Cell implements Comparable<Cell> {
         if (column != cell.column) {
             return false;
         }
-        if (row != cell.row) {
-            return false;
-        }
-        return Objects.equals(value, cell.value);
+        return row == cell.row;
     }
 
     @Override
     public int hashCode() {
         int result = column;
         result = 31 * result + row;
-        result = 31 * result + (value != null ? value.hashCode() : 0);
         return result;
     }
 
